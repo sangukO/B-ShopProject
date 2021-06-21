@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.myshop.mapper.RegMapper">
+  	
+  	<!-- 도서 등록 -->
+  	<insert id="bookEnroll" parameterType="Map">
+  	
+  		insert into book(bookName, uploadUser, author, publeYear, publisher, cateCode, bookPrice, bookIntro, bookContents, bookStatus, fileName, uploadPath)
+		values(#{bookName}, #{uploadUser}, #{author}, #{publeYear},#{publisher},#{cateCode},#{bookPrice},#{bookIntro},#{bookContents}, 0, #{fileName}, #{uploadPath})
+
+  	</insert>
+  	
+  	<!-- 도서 등록 -->
+  	<insert id="bookEnrollHr" parameterType="Map">
+  	
+  		insert into book(bookName, uploadUser, author, publeYear, publisher, cateCode, bookPrice, bookIntro, bookContents, bookStatus, fileName, uploadPath)
+		values(#{bookName}, #{uploadUser}, #{author}, #{publeYear},#{publisher},#{cateCode},#{bookPrice},#{bookIntro},#{bookContents}, 1, #{fileName}, #{uploadPath})
+
+  	</insert>
+  	
+  	<!-- 도서 수정 -->
+  	<update id="bookModify" parameterType="Map">
+  	
+  		update book set 
+  		bookName = #{bookName},
+  		author = #{author},
+  		publeYear = #{publeYear},
+  		publisher = #{publisher},
+  		cateCode = #{cateCode},
+  		bookPrice = #{bookPrice},
+  		bookIntro = #{bookIntro},
+  		bookContents = #{bookContents},
+  		fileName = #{fileName}
+  		where bookId = #{bookId}
+
+  	</update>
+  	
+  	<!-- 카테고리 리스트 -->
+  	<select id="cateList" resultType="com.myshop.dto.CateDto">
+  	
+  		select * from b_cate order by cateCode
+  	
+  	</select>
+  	
+  	<!-- 상품 리스트 -->
+	<select id="goodsGetList" resultType="com.myshop.dto.BookDto">
+	
+		select  bookId, bookName, bookPrice, uploadUser, bookIntro, cateName, aaa.cateCode, aaa.regDate, bookStatus, fileName, uploadPath
+		from book aaa
+		left outer join b_cate bbb on aaa.cateCode = bbb.cateCode
+		where bookStatus = 1 or bookStatus = 2
+		<if test="keyword != null">
+			and (bookName like concat ('%', #{keyword}, '%'))
+		</if>
+		order by bookId desc
+		limit #{skip}, 9
+	
+	</select>
+  	
+  	<!-- 상품 총 갯수 -->
+  	<select id="goodsGetTotal" resultType="int">
+  	
+  		select count(*) from book where bookStatus = 1 or bookStatus = 2
+  		
+  		<if test="keyword != null">
+  		
+  			and bookName like concat('%' , #{keyword}, '%')
+  		
+  		</if>
+  	
+  	</select>
+  	
+  	<!-- 상품 조회 페이지 -->
+	<select id="goodsGetDetail" resultType="com.myshop.dto.BookDto">
+	
+		select bookId, bookName, uploadUser, author, publeYear, publisher, cateCode, bookPrice, bookIntro, bookContents, regDate, updateDate, bookStatus, fileName, uploadPath
+		from book where bookId = #{bookId}
+	
+	</select>
+	
+	<!-- 카테고리 조회 -->
+	<select id="goodsGetCate" resultType="com.myshop.dto.BookDto">
+	
+	select cateName from b_cate where cateCode = (select cateCode from book where bookId = #{bookId})
+	
+	</select>
+
+	<!-- 상품 정보 삭제 -->
+	<delete id="goodsDelete">
+	
+		delete from book where bookId = #{bookId}
+	
+	</delete>
+	
+	<!-- 상품 판매 완료 -->
+	<update id="goodsPurchase">
+		update book
+		set bookStatus = 2
+		where bookId = #{bookId}
+	</update>
+	
+	<!-- 카운트 증가 -->
+	<update id = "userCount" parameterType="String">
+		UPDATE book_member SET count = count + 1 WHERE memberId = #{uploadUser}
+	</update>
+	
+	<!-- 유저 등급 업 -->
+	<update id = "userGradeUp" parameterType="String">
+		UPDATE book_member 
+		SET grade =
+		case
+			WHEN count = 1 THEN 2
+			WHEN count = 2 THEN 3
+			WHEN count = 3 THEN 4
+			ELSE grade
+		END
+		WHERE memberId = #{uploadUser}
+	</update>
+	
+	<!-- 사용자 판매 도서 검색 -->
+	<select id="bookSearch" resultType="com.myshop.dto.BookDto">
+	
+		select bookId, bookName, author, publeYear, publisher, bookPrice, uploadUser, bookIntro, regDate, updateDate, bookStatus
+		from book
+		order by bookId desc
+	
+	</select>
+	
+	<!-- 거절 사유 조회 -->
+	<select id="Whysearch" parameterType="int" resultType="String">
+	
+		select why
+		from book
+		WHERE bookId = #{bookId}
+	
+	</select>
+	
+	<!-- 구매자 추가 -->
+	<update id = "goodsSetBuyer">
+		UPDATE book
+		SET buyer = #{memberId}
+		WHERE bookId = #{bookId}
+	</update>
+	
+	<!-- 구매 카운트 증가 -->
+	<update id = "buyCount" parameterType="String">
+		UPDATE book_member SET buyCount = buyCount + 1 WHERE memberId = #{memberId}
+	</update>
+	
+	<!-- 사용자 구매 도서 검색 -->
+	<select id="buySearch" resultType="com.myshop.dto.BookDto">
+	
+		select bookId, bookName, author, bookPrice, bookIntro, buyer
+		from book
+		order by bookId desc
+	
+	</select>
+	
+
+  </mapper>

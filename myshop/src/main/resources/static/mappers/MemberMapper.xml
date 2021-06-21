@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.myshop.mapper.MemberMapper">
+
+	<!-- 회원가입 -->
+  	<insert id="memberJoin">
+  	
+  		insert into book_member values(#{memberId}, #{memberPw}, #{memberName},
+  		#{memberMail}, 1, now(), 0, 3000, 0, 0)
+  		
+  	</insert>
+
+	<!-- 아이디 중복검사 -->
+  	<select id="idCheck" resultType="int">
+  	
+  		select count(*) from book_member where memberId = #{memberId}
+  	
+  	</select>
+  	
+  	<!-- 로그인 -->
+    <select id="memberLogin" resultType="com.myshop.dto.MemberDto">
+    	
+    	select memberId, memberPw, memberName, memberMail, grade, money, point, count, buyCount from book_member where memberId = #{memberId}
+    
+    </select>
+  	
+  </mapper>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.myshop.mapper.AdminMapper">
+  
+    <!-- 상품 리스트 -->
+	<select id="adminGoodsGetList" resultType="com.myshop.dto.BookDto">
+	
+		select  bookId, bookName, bookPrice, uploadUser, bookIntro, cateName, aaa.cateCode, aaa.regDate, bookStatus
+		from book aaa
+		left outer join b_cate bbb on aaa.cateCode = bbb.cateCode
+		<if test="keyword != null">
+			where (bookName like concat ('%', #{keyword}, '%'))
+		</if>
+		order by bookId desc
+	
+	</select>
+  	
+  	<!-- 상품 총 갯수 -->
+  	<select id="adminGoodsGetTotal" resultType="int">
+  	
+  		select count(*) from book
+  		
+  		<if test="keyword != null">
+  		
+  			where bookName like concat('%' , #{keyword}, '%')
+  		
+  		</if>
+  	
+  	</select>
+  	
+  	<!-- 상품 판매 승인 -->
+	<update id="goodsPass" parameterType="int">
+	
+		update book set bookStatus = 1 where bookId = #{bookId}
+	
+	</update>
+	
+	<!-- 상품 판매 거절 -->
+	<update id="goodsRefuse" parameterType="int">
+	
+		update book set bookStatus = 3 where bookId = #{bookId}
+	
+	</update>
+  	
+	
+	<!-- 거절 사유 작성 -->
+	<update id="goodsRefuseWhy">
+	
+		UPDATE book
+		SET Why = #{Why}
+		WHERE bookId = #{bookId}
+	
+	</update>
+  	
+  	
+  	</mapper>
